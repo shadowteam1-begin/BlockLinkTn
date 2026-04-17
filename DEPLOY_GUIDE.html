@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Step 8 — Deploy BloodLink TN to the Internet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --red:#E8221A; --dark:#0E0E0E; --mid:#555; --muted:#888;
+      --border:#E5E5E5; --bg:#F8F8F6; --white:#fff;
+      --green:#16A34A; --green-light:#F0FDF4;
+      --blue:#1D4ED8; --blue-light:#EFF6FF;
+      --font:'Sora',sans-serif; --mono:'Space Mono',monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font);color:var(--dark);background:var(--bg);line-height:1.65;}
+    a{color:var(--blue);}
+
+    .page{max-width:860px;margin:0 auto;padding:48px 24px 100px;}
+
+    /* Header */
+    .header{text-align:center;margin-bottom:52px;}
+    .tag{display:inline-flex;align-items:center;gap:7px;background:#FFF0EF;color:var(--red);font-size:.75rem;font-weight:700;padding:5px 14px;border-radius:999px;margin-bottom:14px;border:1px solid #FFD9D7;}
+    .header h1{font-size:2.2rem;font-weight:700;letter-spacing:-0.025em;margin-bottom:10px;}
+    .header p{font-size:1rem;color:var(--mid);max-width:560px;margin:0 auto;}
+
+    /* Progress */
+    .steps-progress{display:flex;align-items:center;gap:0;margin-bottom:48px;background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px 20px;overflow-x:auto;}
+    .sp-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:70px;}
+    .sp-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.7rem;font-weight:700;color:var(--muted);background:var(--white);}
+    .sp-dot.done{background:var(--green);border-color:var(--green);color:white;}
+    .sp-dot.active{background:var(--red);border-color:var(--red);color:white;}
+    .sp-label{font-size:.65rem;color:var(--muted);text-align:center;white-space:nowrap;}
+    .sp-dot.done~.sp-label,.sp-dot.active~.sp-label{color:var(--dark);font-weight:600;}
+    .sp-line{flex:1;height:2px;background:var(--border);min-width:16px;}
+    .sp-line.done{background:var(--green);}
+
+    /* Step cards */
+    .step-card{background:var(--white);border:1px solid var(--border);border-radius:18px;margin-bottom:18px;overflow:hidden;}
+    .step-head{display:flex;align-items:center;gap:16px;padding:20px 24px;cursor:pointer;user-select:none;transition:background .15s;}
+    .step-head:hover{background:var(--bg);}
+    .step-circle{width:38px;height:38px;border-radius:50%;background:var(--red);color:white;font-family:var(--mono);font-size:.88rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .step-circle.done{background:var(--green);}
+    .step-title-wrap{flex:1;}
+    .step-title{font-size:1rem;font-weight:600;margin-bottom:2px;}
+    .step-sub{font-size:.8rem;color:var(--muted);}
+    .step-toggle{font-size:1rem;color:var(--muted);transition:transform .2s;}
+    .step-toggle.open{transform:rotate(180deg);}
+    .step-body{padding:0 24px;display:none;}
+    .step-body.open{display:block;padding-bottom:24px;}
+
+    /* Content inside steps */
+    .action-list{list-style:none;display:flex;flex-direction:column;gap:13px;margin-bottom:16px;}
+    .action-item{display:flex;align-items:flex-start;gap:12px;font-size:.9rem;line-height:1.6;}
+    .act-num{width:22px;height:22px;border-radius:50%;background:var(--bg);border:1px solid var(--border);font-size:.68rem;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+
+    /* Code block */
+    .code{background:#0F172A;border-radius:10px;padding:14px 18px;font-family:var(--mono);font-size:.78rem;color:#E2E8F0;line-height:1.9;margin:10px 0;position:relative;overflow-x:auto;}
+    .code .cp{color:#94A3B8;} .code .ck{color:#7DD3FC;} .code .cv{color:#86EFAC;} .code .cc{color:#64748B;} .code .ce{color:#F9E2AF;}
+    .copy-btn{position:absolute;top:10px;right:10px;background:#1E293B;border:1px solid #334155;color:#94A3B8;font-family:var(--font);font-size:.68rem;font-weight:600;padding:4px 9px;border-radius:5px;cursor:pointer;transition:color .2s;}
+    .copy-btn:hover{color:#E2E8F0;}
+
+    /* Alert boxes */
+    .alert{padding:12px 16px;border-radius:10px;font-size:.84rem;margin:12px 0;display:flex;align-items:flex-start;gap:10px;line-height:1.6;}
+    .alert.info   {background:var(--blue-light);color:var(--blue);border:1px solid #BFDBFE;}
+    .alert.success{background:var(--green-light);color:var(--green);border:1px solid #BBF7D0;}
+    .alert.warn   {background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;}
+    .alert.danger {background:#FFF0EF;color:var(--red);border:1px solid #FFD9D7;}
+    .alert-icon{font-size:1rem;flex-shrink:0;}
+
+    /* Env block */
+    .env-block{background:#0F172A;border-radius:10px;padding:18px 20px;margin:12px 0;border:1px solid #1E293B;}
+    .env-line{display:flex;gap:8px;padding:2px 0;flex-wrap:wrap;}
+    .ek{color:#7DD3FC;font-family:var(--mono);font-size:.78rem;white-space:nowrap;}
+    .ee{color:#94A3B8;font-family:var(--mono);font-size:.78rem;}
+    .ev{color:#86EFAC;font-family:var(--mono);font-size:.78rem;word-break:break-all;}
+    .ecomment{color:#475569;font-family:var(--mono);font-size:.72rem;}
+
+    /* Mock URL display */
+    .url-display{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-family:var(--mono);font-size:.82rem;margin:10px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .url-badge{background:var(--green-light);color:var(--green);font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;}
+
+    /* Checklist */
+    .checklist{list-style:none;display:flex;flex-direction:column;gap:8px;margin:14px 0;}
+    .checklist li{display:flex;align-items:center;gap:10px;font-size:.88rem;padding:9px 14px;background:var(--white);border:1px solid var(--border);border-radius:10px;}
+    .chk{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.7rem;}
+    .chk.yes{background:var(--green);border-color:var(--green);color:white;}
+
+    hr{border:none;border-top:1px solid var(--border);margin:18px 0;}
+
+    /* Final card */
+    .finish-card{background:var(--dark);color:white;border-radius:20px;padding:36px;text-align:center;margin-top:36px;}
+    .finish-card h2{font-size:1.8rem;font-weight:700;margin-bottom:10px;}
+    .finish-card p{color:#888;font-size:.92rem;margin-bottom:24px;line-height:1.7;}
+    .url-live{display:inline-block;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:#4ADE80;font-family:var(--mono);font-size:.9rem;padding:10px 20px;border-radius:10px;margin-bottom:20px;}
+    .pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+    .pill{padding:6px 16px;border-radius:999px;font-size:.78rem;font-weight:600;border:1px solid;}
+    .pill.done{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.25);color:#4ADE80;}
+
+    @media(max-width:600px){.steps-progress{gap:4px;}.sp-line{min-width:8px;}.sp-label{font-size:.55rem;}}
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="tag">🩸 BloodLink TN — Step 8 of 8</div>
+    <h1>Deploy to the internet</h1>
+    <p>Frontend → Vercel (free) · Backend → Railway (free) · Database → MongoDB Atlas (already done)</p>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="steps-progress">
+    <div class="sp-item"><div class="sp-dot done">✓</div><div class="sp-label">Landing</div></div>
+    <div class="sp-line done"></div>
+    <div class="sp-item"><div class="sp-dot done">✓</div><div class="sp-label">Patient UI</div></div>
+    <div class="sp-line done"></div>
+    <div class="sp-item"><div class="sp-dot done">✓</div><div class="sp-label">Bank UI</div></div>
+    <div class="sp-line done"></div>
+    <div class="sp-item"><div class="sp-dot done">✓</div><div class="sp-label">Admin UI</div></div>
+    <div class="sp-line done"></div>
+    <div class="sp-item"><div class="sp-dot done">✓</div><div class="sp-label">Backend</div></div>
+    <div class="sp-line done"></div>
+    <div class="sp-item"><div class="sp-dot done">✓</div><div class="sp-label">MongoDB</div></div>
+    <div class="sp-line done"></div>
+    <div class="sp-item"><div class="sp-dot done">✓</div><div class="sp-label">Socket.io</div></div>
+    <div class="sp-line done"></div>
+    <div class="sp-item"><div class="sp-dot done">✓</div><div class="sp-label">SMS/Pay</div></div>
+    <div class="sp-line done"></div>
+    <div class="sp-item"><div class="sp-dot active">8</div><div class="sp-label">Deploy</div></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-card">
+    <div class="step-head" onclick="toggle(1)">
+      <div class="step-circle">1</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Install Git and create GitHub account</div>
+        <div class="step-sub">Required by both Vercel and Railway</div>
+      </div>
+      <div class="step-toggle" id="tog1">▼</div>
+    </div>
+    <div class="step-body" id="body1">
+      <ul class="action-list">
+        <li class="action-item"><div class="act-num">1</div><div>Download Git from <a href="https://git-scm.com" target="_blank">git-scm.com</a> → install with default settings</div></li>
+        <li class="action-item"><div class="act-num">2</div><div>Create a free account at <a href="https://github.com" target="_blank">github.com</a></div></li>
+        <li class="action-item"><div class="act-num">3</div><div>Verify Git is installed — open terminal and run:</div></li>
+      </ul>
+      <div class="code"><span class="cp">$</span> <span class="cv">git --version</span>
+<span class="cc"># Should print: git version 2.x.x</span>
+<button class="copy-btn" onclick="copy('git --version',this)">copy</button></div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-card">
+    <div class="step-head" onclick="toggle(2)">
+      <div class="step-circle">2</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Push your code to GitHub</div>
+        <div class="step-sub">One repo for frontend, one for backend</div>
+      </div>
+      <div class="step-toggle" id="tog2">▼</div>
+    </div>
+    <div class="step-body" id="body2">
+      <p style="font-size:.88rem;color:var(--mid);margin-bottom:14px">Create <strong>two</strong> new repositories on GitHub (github.com → New repository). Make them public. Then run these commands:</p>
+
+      <p style="font-size:.82rem;font-weight:600;margin-bottom:6px">Push the BACKEND:</p>
+      <div class="code"><span class="cc"># In your terminal, navigate to backend folder</span>
+<span class="cp">$</span> <span class="cv">cd blood-alert-backend</span>
+<span class="cp">$</span> <span class="cv">git init</span>
+<span class="cp">$</span> <span class="cv">git add .</span>
+<span class="cp">$</span> <span class="cv">git commit -m "BloodLink TN backend v3"</span>
+<span class="cp">$</span> <span class="cv">git branch -M main</span>
+<span class="cp">$</span> <span class="cv">git remote add origin https://github.com/YOUR_USERNAME/bloodlink-backend.git</span>
+<span class="cp">$</span> <span class="cv">git push -u origin main</span>
+<button class="copy-btn" onclick="copy('git init && git add . && git commit -m \"BloodLink TN backend v3\" && git branch -M main',this)">copy</button></div>
+
+      <p style="font-size:.82rem;font-weight:600;margin:16px 0 6px">Push the FRONTEND:</p>
+      <div class="code"><span class="cp">$</span> <span class="cv">cd ../blood-alert</span>
+<span class="cp">$</span> <span class="cv">git init</span>
+<span class="cp">$</span> <span class="cv">git add .</span>
+<span class="cp">$</span> <span class="cv">git commit -m "BloodLink TN frontend v3"</span>
+<span class="cp">$</span> <span class="cv">git branch -M main</span>
+<span class="cp">$</span> <span class="cv">git remote add origin https://github.com/YOUR_USERNAME/bloodlink-frontend.git</span>
+<span class="cp">$</span> <span class="cv">git push -u origin main</span>
+<button class="copy-btn" onclick="copy('cd ../blood-alert && git init && git add . && git commit -m \"BloodLink TN frontend v3\" && git branch -M main',this)">copy</button></div>
+
+      <div class="alert warn"><div class="alert-icon">⚠</div><div>Your <code>.gitignore</code> already excludes <code>.env</code> and <code>node_modules</code>. Double-check before pushing — never upload secrets to GitHub.</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-card">
+    <div class="step-head" onclick="toggle(3)">
+      <div class="step-circle">3</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Deploy backend to Railway</div>
+        <div class="step-sub">Free hosting for Node.js servers — railway.app</div>
+      </div>
+      <div class="step-toggle" id="tog3">▼</div>
+    </div>
+    <div class="step-body" id="body3">
+      <ul class="action-list">
+        <li class="action-item"><div class="act-num">1</div><div>Go to <a href="https://railway.app" target="_blank">railway.app</a> → Sign up with your GitHub account</div></li>
+        <li class="action-item"><div class="act-num">2</div><div>Click <strong>"New Project"</strong> → <strong>"Deploy from GitHub repo"</strong></div></li>
+        <li class="action-item"><div class="act-num">3</div><div>Select your <strong>bloodlink-backend</strong> repository</div></li>
+        <li class="action-item"><div class="act-num">4</div><div>Railway auto-detects Node.js and runs <code>npm start</code></div></li>
+        <li class="action-item"><div class="act-num">5</div><div>Click <strong>"Variables"</strong> tab → add ALL these environment variables:</div></li>
+      </ul>
+
+      <div class="env-block">
+        <div class="env-line"><span class="ecomment"># Paste each of these as KEY=VALUE in Railway Variables</span></div>
+        <div style="height:8px"></div>
+        <div class="env-line"><span class="ek">MONGO_URI</span><span class="ee">=</span><span class="ev">mongodb+srv://blood_01:blood_2627@cluster0.9g8bd3g.mongodb.net/bloodlink?retryWrites=true&w=majority&appName=Cluster0</span></div>
+        <div class="env-line"><span class="ek">JWT_SECRET</span><span class="ee">=</span><span class="ev">bloodlink_tn_jwt_secret_2024_super_secure_key</span></div>
+        <div class="env-line"><span class="ek">JWT_EXPIRES_IN</span><span class="ee">=</span><span class="ev">7d</span></div>
+        <div class="env-line"><span class="ek">NODE_ENV</span><span class="ee">=</span><span class="ev">production</span></div>
+        <div class="env-line"><span class="ek">PORT</span><span class="ee">=</span><span class="ev">5000</span></div>
+        <div class="env-line"><span class="ek">FRONTEND_URL</span><span class="ee">=</span><span class="ev">https://your-app.vercel.app</span><span class="ecomment"> ← fill after Step 4</span></div>
+        <div class="env-line"><span class="ek">MSG91_AUTH_KEY</span><span class="ee">=</span><span class="ev">your_msg91_key_here</span></div>
+        <div class="env-line"><span class="ek">MSG91_TEMPLATE_ID</span><span class="ee">=</span><span class="ev">your_template_id</span></div>
+        <div class="env-line"><span class="ek">MSG91_SENDER_ID</span><span class="ee">=</span><span class="ev">BLDLNK</span></div>
+        <div class="env-line"><span class="ek">RAZORPAY_KEY_ID</span><span class="ee">=</span><span class="ev">rzp_test_xxxxxxxxxx</span></div>
+        <div class="env-line"><span class="ek">RAZORPAY_KEY_SECRET</span><span class="ee">=</span><span class="ev">xxxxxxxxxxxxxxxxxxxxxxxxxx</span></div>
+      </div>
+
+      <ul class="action-list" style="margin-top:14px">
+        <li class="action-item"><div class="act-num">6</div><div>Click <strong>"Deploy"</strong> — Railway builds and starts your server</div></li>
+        <li class="action-item"><div class="act-num">7</div><div>Go to <strong>Settings → Networking → Generate Domain</strong> to get your public URL</div></li>
+      </ul>
+
+      <p style="font-size:.82rem;font-weight:600;margin:12px 0 6px">Your backend URL will look like:</p>
+      <div class="url-display">
+        <span class="url-badge">LIVE</span>
+        <span style="color:var(--green);font-weight:700">https://bloodlink-tn-backend.up.railway.app</span>
+      </div>
+
+      <p style="font-size:.82rem;font-weight:600;margin:12px 0 6px">Test it — paste this in your browser:</p>
+      <div class="code"><span class="ce">https://bloodlink-tn-backend.up.railway.app/api</span>
+<span class="cc"># Should return JSON: { "success": true, "message": "🩸 BloodLink TN API v3.0" }</span>
+<button class="copy-btn" onclick="copy('https://bloodlink-tn-backend.up.railway.app/api',this)">copy</button></div>
+
+      <div class="alert success"><div class="alert-icon">✓</div><div>Free Railway plan gives you $5 credit/month — enough to run your backend 24/7 for a college project.</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-card">
+    <div class="step-head" onclick="toggle(4)">
+      <div class="step-circle">4</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Deploy frontend to Vercel</div>
+        <div class="step-sub">Free static hosting — vercel.com</div>
+      </div>
+      <div class="step-toggle" id="tog4">▼</div>
+    </div>
+    <div class="step-body" id="body4">
+      <ul class="action-list">
+        <li class="action-item"><div class="act-num">1</div><div>Go to <a href="https://vercel.com" target="_blank">vercel.com</a> → Sign up with GitHub</div></li>
+        <li class="action-item"><div class="act-num">2</div><div>Click <strong>"Add New Project"</strong> → Import your <strong>bloodlink-frontend</strong> repo</div></li>
+        <li class="action-item"><div class="act-num">3</div><div>Framework Preset: <strong>Other</strong> (it's plain HTML, not React)</div></li>
+        <li class="action-item"><div class="act-num">4</div><div>Root directory: leave as <strong>"/"</strong> (root)</div></li>
+        <li class="action-item"><div class="act-num">5</div><div>Click <strong>"Deploy"</strong> — Vercel deploys in ~30 seconds</div></li>
+      </ul>
+
+      <p style="font-size:.82rem;font-weight:600;margin:12px 0 6px">Your frontend URL will look like:</p>
+      <div class="url-display">
+        <span class="url-badge">LIVE</span>
+        <span style="color:var(--blue);font-weight:700">https://bloodlink-tn.vercel.app</span>
+      </div>
+
+      <div class="alert info"><div class="alert-icon">ℹ</div><div>After getting your Vercel URL, go back to Railway → Variables → update <code>FRONTEND_URL</code> to your Vercel URL so CORS works correctly.</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step-card">
+    <div class="step-head" onclick="toggle(5)">
+      <div class="step-circle">5</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Update your frontend API URL</div>
+        <div class="step-sub">Point frontend to your live Railway backend</div>
+      </div>
+      <div class="step-toggle" id="tog5">▼</div>
+    </div>
+    <div class="step-body" id="body5">
+      <p style="font-size:.88rem;color:var(--mid);margin-bottom:12px">Open <code>blood-alert/js/api.js</code> and update the <code>PRODUCTION_URL</code> with your actual Railway URL:</p>
+
+      <div class="code"><span class="cc">// Line 8 in api.js — change this to YOUR Railway URL</span>
+<span class="ck">const</span> <span class="ce">PRODUCTION_URL</span> = <span class="cv">'https://bloodlink-tn-backend.up.railway.app'</span>;
+<button class="copy-btn" onclick="copy(\"const PRODUCTION_URL = 'https://bloodlink-tn-backend.up.railway.app';\",this)">copy</button></div>
+
+      <p style="font-size:.88rem;color:var(--mid);margin:14px 0 8px">Do the same in <code>blood-alert/js/socket.js</code> (line 27):</p>
+
+      <div class="code"><span class="cc">// Already auto-detects — just verify the URL matches</span>
+<span class="ck">const</span> <span class="ce">SOCKET_URL</span> = (window.location.hostname === <span class="cv">'localhost'</span> ...)
+  ? <span class="cv">'http://localhost:5000'</span>
+  : <span class="cv">'https://bloodlink-tn-backend.up.railway.app'</span>;
+<button class="copy-btn" onclick="copy(\"https://bloodlink-tn-backend.up.railway.app\",this)">copy</button></div>
+
+      <p style="font-size:.88rem;color:var(--mid);margin:14px 0 8px">Then commit and push the change:</p>
+      <div class="code"><span class="cp">$</span> <span class="cv">cd blood-alert</span>
+<span class="cp">$</span> <span class="cv">git add js/api.js js/socket.js</span>
+<span class="cp">$</span> <span class="cv">git commit -m "Update production API URL"</span>
+<span class="cp">$</span> <span class="cv">git push</span>
+<span class="cc"># Vercel auto-redeploys in ~20 seconds</span>
+<button class="copy-btn" onclick="copy('git add js/api.js js/socket.js && git commit -m \"Update production API URL\" && git push',this)">copy</button></div>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step-card">
+    <div class="step-head" onclick="toggle(6)">
+      <div class="step-circle">6</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Seed your live database</div>
+        <div class="step-sub">Run seed once against the deployed backend</div>
+      </div>
+      <div class="step-toggle" id="tog6">▼</div>
+    </div>
+    <div class="step-body" id="body6">
+      <p style="font-size:.88rem;color:var(--mid);margin-bottom:12px">Your MongoDB Atlas URL is already in your <code>.env</code>. Run seed locally — it connects to the same cloud Atlas database your Railway backend uses:</p>
+      <div class="code"><span class="cp">$</span> <span class="cv">cd blood-alert-backend</span>
+<span class="cp">$</span> <span class="cv">npm run seed</span>
+<span class="cc"># Creates all test accounts, blood banks, sample data</span>
+<button class="copy-btn" onclick="copy('cd blood-alert-backend && npm run seed',this)">copy</button></div>
+      <div class="alert success"><div class="alert-icon">✓</div><div>You only need to run this once. The data is stored in MongoDB Atlas which is shared between your local backend and Railway backend.</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 7 -->
+  <div class="step-card">
+    <div class="step-head" onclick="toggle(7)">
+      <div class="step-circle">7</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Test everything live</div>
+        <div class="step-sub">End-to-end test on your deployed app</div>
+      </div>
+      <div class="step-toggle" id="tog7">▼</div>
+    </div>
+    <div class="step-body" id="body7">
+      <ul class="checklist">
+        <li><div class="chk yes">✓</div> Open your Vercel URL — landing page loads</li>
+        <li><div class="chk yes">✓</div> Register as a patient — redirects to patient dashboard</li>
+        <li><div class="chk yes">✓</div> Search B+ in Salem — blood banks load from MongoDB</li>
+        <li><div class="chk yes">✓</div> Login as blood bank (salem.bb@bloodlink.tn / Salem@1234)</li>
+        <li><div class="chk yes">✓</div> Update stock → patients see live update (Socket.io)</li>
+        <li><div class="chk yes">✓</div> Login as admin (admin@bloodlink.tn / Admin@1234)</li>
+        <li><div class="chk yes">✓</div> Admin panel shows all banks, hospitals, patients</li>
+        <li><div class="chk yes">✓</div> Approve pending Tiruppur blood bank</li>
+        <li><div class="chk yes">✓</div> Visit /pages/donate.html — donation page works</li>
+        <li><div class="chk yes">✓</div> API health check returns JSON at /api</li>
+      </ul>
+
+      <div class="alert warn"><div class="alert-icon">⚠</div><div><strong>Socket.io on Railway:</strong> Railway supports WebSockets natively. If real-time stops working after deploy, go to Railway → Settings → Enable WebSocket support.</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 8 -->
+  <div class="step-card">
+    <div class="step-head" onclick="toggle(8)">
+      <div class="step-circle">8</div>
+      <div class="step-title-wrap">
+        <div class="step-title">Auto-deploy on every code change</div>
+        <div class="step-sub">Push to GitHub → both sites update automatically</div>
+      </div>
+      <div class="step-toggle" id="tog8">▼</div>
+    </div>
+    <div class="step-body" id="body8">
+      <p style="font-size:.88rem;color:var(--mid);margin-bottom:14px">Both Vercel and Railway watch your GitHub repos. Every time you push a change, they automatically rebuild and redeploy — no manual steps needed.</p>
+
+      <div class="code"><span class="cc"># Workflow after deploy: make a change, push, it's live</span>
+<span class="cp">$</span> <span class="cv">git add .</span>
+<span class="cp">$</span> <span class="cv">git commit -m "Fixed patient search bug"</span>
+<span class="cp">$</span> <span class="cv">git push</span>
+<span class="cc"># → Vercel/Railway detects the push → rebuilds → live in ~45 seconds</span>
+<button class="copy-btn" onclick="copy('git add . && git commit -m \"Update\" && git push',this)">copy</button></div>
+
+      <hr/>
+      <p style="font-size:.88rem;font-weight:600;margin-bottom:10px">Optional: Custom domain</p>
+      <ul class="action-list">
+        <li class="action-item"><div class="act-num">1</div><div>Buy a domain at <a href="https://www.namecheap.com" target="_blank">namecheap.com</a> (e.g. <code>bloodlinktn.org</code> — ~$8/year)</div></li>
+        <li class="action-item"><div class="act-num">2</div><div>Vercel: Project Settings → Domains → Add your domain</div></li>
+        <li class="action-item"><div class="act-num">3</div><div>Add the CNAME record Vercel shows you in your domain DNS settings</div></li>
+        <li class="action-item"><div class="act-num">4</div><div>HTTPS is automatic — Vercel handles the SSL certificate</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Finish card -->
+  <div class="finish-card">
+    <h2>🎉 BloodLink TN is live!</h2>
+    <p>Your full-stack blood availability platform is deployed to the internet.<br/>Share the Vercel URL with your college. Anyone in Tamil Nadu can use it.</p>
+    <div class="url-live">https://bloodlink-tn.vercel.app</div>
+    <div class="pills">
+      <span class="pill done">✓ Landing page</span>
+      <span class="pill done">✓ Auth system</span>
+      <span class="pill done">✓ Patient dashboard</span>
+      <span class="pill done">✓ Blood bank dashboard</span>
+      <span class="pill done">✓ Admin panel</span>
+      <span class="pill done">✓ Hospitals section</span>
+      <span class="pill done">✓ Real-time Socket.io</span>
+      <span class="pill done">✓ SMS alerts</span>
+      <span class="pill done">✓ Donation payments</span>
+      <span class="pill done">✓ MongoDB Atlas</span>
+      <span class="pill done">✓ Railway backend</span>
+      <span class="pill done">✓ Vercel frontend</span>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+function toggle(n) {
+  const body = document.getElementById('body' + n);
+  const tog  = document.getElementById('tog'  + n);
+  const open = body.classList.contains('open');
+  document.querySelectorAll('.step-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.step-toggle').forEach(t => t.classList.remove('open'));
+  if (!open) { body.classList.add('open'); tog.classList.add('open'); }
+}
+function copy(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 1500);
+  });
+}
+toggle(1); // open first step by default
+</script>
+</body>
+</html>

@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support BloodLink TN — Donate via UPI</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --red: #E8221A;
+      --dark: #0E0E0E;
+      --mid: #555;
+      --muted: #888;
+      --border: #E5E4E1;
+      --bg: #F4F3F0;
+      --white: #fff;
+      --green: #16A34A;
+      --green-bg: #F0FDF4;
+      --green-border: #BBF7D0;
+      --font: 'Sora', sans-serif;
+      --mono: 'Space Mono', monospace;
+      --radius: 12px;
+      --radius-lg: 20px;
+    }
+
+    body {
+      font-family: var(--font);
+      color: var(--dark);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, .92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--mono);
+      font-size: .95rem;
+      font-weight: 700;
+    }
+
+    .logo-drop,
+    .logo-tn {
+      color: var(--red);
+    }
+
+    .btn-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--mid);
+      background: var(--white);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-back:hover {
+      color: var(--dark);
+      border-color: #ccc;
+    }
+
+    /* Page layout */
+    .page {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 88px 20px 80px;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFF0EF;
+      color: var(--red);
+      font-size: .72rem;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 999px;
+      border: 1px solid #FFD9D7;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -.025em;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      font-size: .95rem;
+      color: var(--mid);
+      max-width: 480px;
+      margin: 0 auto 24px;
+      line-height: 1.75;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 24px;
+      margin-bottom: 48px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 0 20px;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat-item:last-child {
+      border-right: none;
+    }
+
+    .stat-num {
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .stat-lbl {
+      font-size: .72rem;
+      color: var(--muted);
+    }
+
+    /* Two-column grid */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* QR Card */
+    .qr-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+    }
+
+    .qr-header {
+      background: var(--dark);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qr-header-title {
+      font-size: .88rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .qr-header-sub {
+      font-size: .72rem;
+      color: #888;
+    }
+
+    .qr-body {
+      padding: 24px;
+      text-align: center;
+    }
+
+    .qr-img-wrap {
+      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      display: inline-block;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .qr-img {
+      width: 200px;
+      height: 200px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .qr-download-btn {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: var(--dark);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: .65rem;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      opacity: .8;
+      transition: opacity .2s;
+    }
+
+    .qr-download-btn:hover {
+      opacity: 1;
+    }
+
+    .upi-id-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .upi-id-label {
+      font-size: .68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+    }
+
+    .upi-id-val {
+      font-family: var(--mono);
+      font-size: .82rem;
+      color: var(--dark);
+      font-weight: 700;
+    }
+
+    .upi-copy-btn {
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--mid);
+      background: var(--white);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .15s;
+      font-family: var(--font);
+    }
+
+    .upi-copy-btn:hover {
+      color: var(--dark);
+      border-color: #bbb;
+    }
+
+    .qr-steps {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .qr-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: .8rem;
+      color: var(--mid);
+      line-height: 1.5;
+    }
+
+    .qr-step-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-size: .65rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--dark);
+      margin-top: 1px;
+    }
+
+    /* Recent donors */
+    .recent-donors {
+      background: var(--dark);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    .recent-title {
+      font-size: .72rem;
+      font-weight: 700;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 12px;
+    }
+
+    .donor-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    .donor-row:last-child {
+      border-bottom: none;
+    }
+
+    .donor-av {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1e1e1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .68rem;
+      font-weight: 700;
+      color: #555;
+      flex-shrink: 0;
+    }
+
+    .donor-name {
+      flex: 1;
+      font-size: .82rem;
+      color: #ccc;
+    }
+
+    .donor-amount {
+      font-family: var(--mono);
+      font-size: .82rem;
+      font-weight: 700;
+      color: #4ADE80;
+    }
+
+    /* Form card */
+    .form-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
+    }
+
+    .form-card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: -.015em;
+    }
+
+    .form-card .form-sub {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 5px;
+    }
+
+    .form-group label .req {
+      color: var(--red);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      font-family: var(--font);
+      font-size: .88rem;
+      color: var(--dark);
+      background: #FAFAFA;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      transition: border-color .2s, background .2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--red);
+      background: #fff;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: #C0BFBC;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Amount presets */
+    .amount-presets {
+      display: flex;
+      gap: 7px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .preset {
+      padding: 6px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--mid);
+      cursor: pointer;
+      transition: all .15s;
+      background: #FAFAFA;
+    }
+
+    .preset:hover,
+    .preset.sel {
+      border-color: var(--green);
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    .custom-amount {
+      display: flex;
+      align-items: center;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #FAFAFA;
+      transition: border-color .2s;
+    }
+
+    .custom-amount:focus-within {
+      border-color: var(--red);
+      background: #fff;
+    }
+
+    .amt-prefix {
+      padding: 0 10px 0 14px;
+      font-family: var(--mono);
+      font-weight: 700;
+      color: var(--muted);
+      border-right: 1px solid var(--border);
+      height: 42px;
+      display: flex;
+      align-items: center;
+    }
+
+    .amt-input {
+      flex: 1;
+      border: none !important;
+      outline: none;
+      background: transparent;
+      font-family: var(--mono);
+      font-size: .95rem;
+      font-weight: 700;
+      padding: 0 12px;
+    }
+
+    /* Screenshot upload */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: #FAFAFA;
+      position: relative;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: var(--red);
+      background: #FFF5F5;
+    }
+
+    .upload-zone input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+
+    .upload-text {
+      font-size: .82rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .upload-text strong {
+      color: var(--dark);
+    }
+
+    .preview-wrap {
+      display: none;
+      margin-top: 10px;
+      position: relative;
+    }
+
+    .preview-img {
+      width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .preview-remove {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, .6);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: .7rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font);
+    }
+
+    /* Alert */
+    .form-alert {
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-size: .82rem;
+      margin-bottom: 14px;
+      font-weight: 500;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .form-alert.error {
+      background: #FEF2F2;
+      color: #DC2626;
+      border: 1px solid #FECACA;
+    }
+
+    .form-alert.success {
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid var(--green-border);
+    }
+
+    .form-alert.info {
+      background: #EFF6FF;
+      color: #1D4ED8;
+      border: 1px solid #BFDBFE;
+    }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--red);
+      color: #fff;
+      font-family: var(--font);
+      font-size: .95rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .2s, transform .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(232, 34, 26, .3);
+      margin-top: 4px;
+    }
+
+    .btn-submit:hover {
+      background: #C01A12;
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .secure-note {
+      text-align: center;
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    /* Success state */
+    .success-card {
+      display: none;
+      background: var(--white);
+      border: 1px solid var(--green-border);
+      border-top: 4px solid var(--green);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      text-align: center;
+      margin: 0 auto;
+      max-width: 520px;
+    }
+
+    .success-icon {
+      font-size: 3rem;
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .success-card h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .success-card p {
+      font-size: .88rem;
+      color: var(--mid);
+      line-height: 1.75;
+      margin-bottom: 6px;
+    }
+
+    .payment-id-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--dark);
+      margin: 14px auto;
+      max-width: 340px;
+    }
+
+    .what-next {
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: left;
+      margin-top: 16px;
+    }
+
+    .what-next-title {
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .what-next ul {
+      font-size: .82rem;
+      color: #15803D;
+      line-height: 2;
+      padding-left: 16px;
+    }
+
+    .btn-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 20px;
+      padding: 11px 24px;
+      background: var(--dark);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Animated Thank You Tag */
+    .thank-you-tag {
+      display: inline-block;
+      background: #FEF2F2;
+      color: var(--red);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: .85rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      border: 1px solid #FECACA;
+      animation: pulseTag 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseTag {
+
+      0%,
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(232, 34, 26, 0.2);
+      }
+
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px 4px rgba(232, 34, 26, 0);
+      }
+    }
+
+    /* Why card */
+    .why-card {
+      background: var(--dark);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-top: 0;
+    }
+
+    .why-card h3 {
+      font-size: .9rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .why-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .why-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .07);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .95rem;
+      flex-shrink: 0;
+    }
+
+    .why-text h4 {
+      font-size: .82rem;
+      font-weight: 600;
+      color: #ccc;
+      margin-bottom: 2px;
+    }
+
+    .why-text p {
+      font-size: .74rem;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    @media(max-width:740px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-bar {
+        flex-direction: column;
+        gap: 8px;
+        padding: 14px 18px;
+      }
+
+      .stat-item {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 0 0 8px;
+      }
+
+      .stat-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-logo">
+        <span class="logo-drop">&#9632;</span>
+        <span>BloodLink<span class="logo-tn">TN</span></span>
+      </a>
+      <button class="btn-back" onclick="history.back()">← Back</button>
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-tag">♥ Support the mission</div>
+      <h1>Help keep BloodLink TN free</h1>
+      <p>We're a student-built non-profit. Every rupee keeps the platform running — servers, SMS alerts, and expanding
+        across Tamil Nadu.</p>
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-num" id="statRaised">₹0</div>
+          <div class="stat-lbl">Total raised</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" id="statDonors">0</div>
+          <div class="stat-lbl">Supporters</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">Free</div>
+          <div class="stat-lbl">For patients always</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main form — shown before payment -->
+    <div id="mainContent">
+      <div class="grid">
+
+        <!-- LEFT: QR + Why -->
+        <div>
+          <div class="qr-card">
+            <div class="qr-header">
+              <div>
+                <div class="qr-header-title">Scan & Pay with any UPI app</div>
+                <div class="qr-header-sub">GPay · PhonePe · Paytm · BHIM · any UPI</div>
+              </div>
+            </div>
+            <div class="qr-body">
+              <!-- QR Image -->
+              <div class="qr-img-wrap">
+                <img src="../assets/upi-qr.png" alt="BloodLink TN UPI QR Code" class="qr-img" id="qrImg"
+                  onerror="this.style.display='none';document.getElementById('qrFallback').style.display='flex'" />
+                <!-- Fallback if image not found -->
+                <div id="qrFallback"
+                  style="display:none;width:200px;height:200px;background:#f5f5f5;border-radius:8px;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+                  <span style="font-size:2rem">📱</span>
+                  <span style="font-size:.72rem;color:var(--muted);text-align:center">UPI
+                    QR<br>mohammedarif270306@oksbi</span>
+                </div>
+                <button class="qr-download-btn" onclick="downloadQR()">⬇ Save QR</button>
+              </div>
+
+              <!-- UPI ID -->
+              <div class="upi-id-box">
+                <div>
+                  <div class="upi-id-label">UPI ID</div>
+                  <div class="upi-id-val" id="upiIdVal">mohammedarif270306@oksbi</div>
+                </div>
+                <button class="upi-copy-btn" onclick="copyUPI(this)">Copy</button>
+              </div>
+
+              <!-- Steps -->
+              <div class="qr-steps">
+                <div class="qr-step">
+                  <div class="qr-step-num">1</div>Open GPay / PhonePe / any UPI app
+                </div>
+                <div class="qr-step">
+                  <div class="qr-step-num">2</div>Scan the QR above or enter UPI ID
+                </div>
+                <div class="qr-step">
+                  <div class="qr-step-num">3</div>Enter amount and complete payment
+                </div>
+                <div class="qr-step">
+                  <div class="qr-step-num">4</div>Fill the form on the right and upload screenshot
+                </div>
+                <div class="qr-step">
+                  <div class="qr-step-num">5</div>Admin verifies and confirms your donation
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent donors -->
+          <div class="recent-donors">
+            <div class="recent-title">Recent supporters</div>
+            <div id="recentDonors">
+              <div style="font-size:.78rem;color:#555">Loading...</div>
+            </div>
+          </div>
+
+          <!-- Why card -->
+          <div class="why-card" style="margin-top:16px">
+            <h3>Where your money goes</h3>
+            <div class="why-item">
+              <div class="why-icon">📡</div>
+              <div class="why-text">
+                <h4>Server & hosting</h4>
+                <p>Keeps BloodLink live 24/7 for all 38 TN districts</p>
+              </div>
+            </div>
+            <div class="why-item">
+              <div class="why-icon">📱</div>
+              <div class="why-text">
+                <h4>SMS alerts</h4>
+                <p>₹100 = 555 life-saving SMS alerts to waiting patients</p>
+              </div>
+            </div>
+            <div class="why-item">
+              <div class="why-icon">🌐</div>
+              <div class="why-text">
+                <h4>Expanding coverage</h4>
+                <p>Onboarding more blood banks from rural Tamil Nadu</p>
+              </div>
+            </div>
+            <div class="why-item">
+              <div class="why-icon">🎓</div>
+              <div class="why-text">
+                <h4>Student-built</h4>
+                <p>Built as a CS Engineering public service project</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Payment form -->
+        <div class="form-card">
+          <h2>Confirm your donation</h2>
+          <p class="form-sub">Complete the payment on your UPI app first, then fill this form and upload your payment
+            screenshot for verification.</p>
+
+          <!-- Amount presets -->
+          <div class="form-group">
+            <label>Donation amount <span class="req">*</span></label>
+            <div class="amount-presets">
+              <span class="preset" data-amt="50" onclick="selectAmt(this)">₹50</span>
+              <span class="preset sel" data-amt="100" onclick="selectAmt(this)">₹100</span>
+              <span class="preset" data-amt="250" onclick="selectAmt(this)">₹250</span>
+              <span class="preset" data-amt="500" onclick="selectAmt(this)">₹500</span>
+              <span class="preset" data-amt="1000" onclick="selectAmt(this)">₹1000</span>
+            </div>
+            <div class="custom-amount">
+              <div class="amt-prefix">₹</div>
+              <input type="number" class="amt-input" id="amtInput" placeholder="Or enter custom amount" min="1"
+                oninput="onCustomAmt(this)" />
+            </div>
+          </div>
+
+          <!-- Name + Phone -->
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full name <span class="req">*</span></label>
+              <input type="text" id="donorName" placeholder="Mohammed Arif" autocomplete="name" />
+            </div>
+            <div class="form-group">
+              <label>Phone number <span class="req">*</span></label>
+              <input type="tel" id="donorPhone" placeholder="98765 43210" maxlength="10" />
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label>Email address <span class="req">*</span></label>
+            <input type="email" id="donorEmail" placeholder="you@example.com" autocomplete="email" />
+          </div>
+
+          <!-- UPI Ref (optional) -->
+          <div class="form-group">
+            <label>UPI Transaction ID <span style="font-weight:400;color:var(--muted)">(optional but helps
+                verification)</span></label>
+            <input type="text" id="upiRef" placeholder="e.g. 412345678901 (from payment app)" />
+          </div>
+
+          <!-- Message -->
+          <div class="form-group">
+            <label>Message <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+            <input type="text" id="donorMsg" placeholder="Keep up the great work! — Your name, City" />
+          </div>
+
+          <!-- Screenshot upload -->
+          <div class="form-group">
+            <label>Payment screenshot <span class="req">*</span></label>
+            <div class="upload-zone" id="uploadZone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)"
+              ondrop="onDrop(event)">
+              <input type="file" id="screenshotInput" accept="image/*" onchange="onFileSelect(this)" />
+              <div class="upload-icon" id="uploadIcon">📸</div>
+              <div class="upload-text" id="uploadText">
+                <strong>Tap to upload screenshot</strong><br>
+                Drag & drop or tap to browse · JPG, PNG under 5MB
+              </div>
+              <div class="preview-wrap" id="previewWrap">
+                <img id="previewImg" class="preview-img" src="" alt="Payment screenshot" />
+                <button class="preview-remove" onclick="removeScreenshot(event)">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="formAlert" class="form-alert"></div>
+
+          <button class="btn-submit" id="submitBtn" onclick="submitPayment()">
+            <span id="submitBtnText">Submit payment for verification</span>
+          </button>
+
+          <p class="secure-note">
+            <svg viewBox="0 0 16 16" fill="none" width="12" height="12">
+              <rect x="3" y="7" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3" />
+              <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.3" />
+            </svg>
+            Admin verifies every payment · Your data is secure
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div id="successView">
+      <div class="success-card">
+        <span class="success-icon">✅</span>
+        <div class="thank-you-tag">♥ Thank you for supporting us!</div>
+        <h2>Payment submitted successfully</h2>
+        <p>Our admin will verify your screenshot and confirm your donation.</p>
+        <p style="font-size:.82rem;color:var(--muted)">You'll see your name in the supporters list once verified.</p>
+
+        <div class="payment-id-box">
+          Payment ID: <span id="successPaymentId">—</span>
+        </div>
+
+        <div class="what-next">
+          <div class="what-next-title">What happens next</div>
+          <ul>
+            <li>Admin reviews your screenshot (usually within a few hours)</li>
+            <li>Once verified, your donation is marked as confirmed</li>
+            <li>Your name appears in the supporters list</li>
+            <li>Your donation helps keep BloodLink TN free for everyone</li>
+          </ul>
+        </div>
+
+        <button class="btn-home" onclick="window.location.href='../index.html'">← Back to BloodLink TN</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:8000/api'
+      : 'https://bloodlink-tn-backend.up.railway.app/api';
+
+    const UPI_ID = 'mohammedarif270306@oksbi';
+    let selectedAmt = 100;
+    let screenshotB64 = null;
+    let screenshotName = null;
+
+    /* ── Load stats on page load ── */
+    async function loadStats() {
+      try {
+        const r = await fetch(API + '/payments/total');
+        const d = await r.json();
+        if (d.success) {
+          document.getElementById('statRaised').textContent = '₹' + (d.total || 0).toLocaleString('en-IN');
+          document.getElementById('statDonors').textContent = d.count || 0;
+        }
+      } catch (e) { }
+    }
+
+    async function loadRecent() {
+      try {
+        const r = await fetch(API + '/payments/recent');
+        const d = await r.json();
+        const wrap = document.getElementById('recentDonors');
+        if (!d.success || !d.payments?.length) {
+          wrap.innerHTML = '<div style="font-size:.78rem;color:#555">Be the first supporter!</div>';
+          return;
+        }
+        wrap.innerHTML = d.payments.map(p =>
+          '<div class="donor-row">' +
+          '<div class="donor-av">' + (p.donor?.name || '?')[0].toUpperCase() + '</div>' +
+          '<div class="donor-name">' + (p.donor?.name || '—') + (p.message ? ' — <em style="color:#555;font-style:italic">' + p.message.slice(0, 35) + '</em>' : '') + '</div>' +
+          '<div class="donor-amount">₹' + (p.amount || 0) + '</div>' +
+          '</div>'
+        ).join('');
+      } catch (e) { }
+    }
+
+    /* ── Amount selection ── */
+    function selectAmt(el) {
+      document.querySelectorAll('.preset').forEach(p => p.classList.remove('sel'));
+      el.classList.add('sel');
+      selectedAmt = parseInt(el.getAttribute('data-amt'));
+      document.getElementById('amtInput').value = '';
+    }
+    function onCustomAmt(inp) {
+      document.querySelectorAll('.preset').forEach(p => p.classList.remove('sel'));
+      selectedAmt = parseInt(inp.value) || 0;
+    }
+
+    /* ── UPI copy ── */
+    function copyUPI(btn) {
+      navigator.clipboard.writeText(UPI_ID).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+
+    /* ── QR download ── */
+    function downloadQR() {
+      const img = document.getElementById('qrImg');
+      if (!img.src) return;
+      const a = document.createElement('a');
+      a.href = img.src;
+      a.download = 'BloodLink-TN-UPI-QR.png';
+      a.click();
+    }
+
+    /* ── Screenshot upload ── */
+    function onFileSelect(input) {
+      if (input.files?.[0]) processFile(input.files[0]);
+    }
+    function onDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
+    function onDragLeave(e) { document.getElementById('uploadZone').classList.remove('drag-over'); }
+    function onDrop(e) {
+      e.preventDefault();
+      document.getElementById('uploadZone').classList.remove('drag-over');
+      if (e.dataTransfer.files?.[0]) processFile(e.dataTransfer.files[0]);
+    }
+
+    function processFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showAlert('error', 'Please upload an image file (JPG, PNG, etc.)');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showAlert('error', 'Image too large. Please use an image under 5MB.');
+        return;
+      }
+      screenshotName = file.name;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        screenshotB64 = e.target.result;
+        const preview = document.getElementById('previewImg');
+        preview.src = screenshotB64;
+        document.getElementById('uploadIcon').style.display = 'none';
+        document.getElementById('uploadText').style.display = 'none';
+        document.getElementById('previewWrap').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeScreenshot(e) {
+      e.stopPropagation();
+      screenshotB64 = null; screenshotName = null;
+      document.getElementById('screenshotInput').value = '';
+      document.getElementById('previewImg').src = '';
+      document.getElementById('previewWrap').style.display = 'none';
+      document.getElementById('uploadIcon').style.display = 'block';
+      document.getElementById('uploadText').style.display = 'block';
+    }
+
+    /* ── Validation ── */
+    function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+    function isPhone(v) { return /^\d{10}$/.test(v.replace(/\s/g, '')); }
+
+    function showAlert(type, msg) {
+      const el = document.getElementById('formAlert');
+      el.className = 'form-alert ' + type;
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    /* ── Submit ── */
+    async function submitPayment() {
+      const name = document.getElementById('donorName').value.trim();
+      const phone = document.getElementById('donorPhone').value.trim();
+      const email = document.getElementById('donorEmail').value.trim();
+      const upiRef = document.getElementById('upiRef').value.trim();
+      const msg = document.getElementById('donorMsg').value.trim();
+
+      document.getElementById('formAlert').style.display = 'none';
+
+      // Validate
+      if (!name) { showAlert('error', 'Please enter your full name'); return; }
+      if (!phone) { showAlert('error', 'Please enter your phone number'); return; }
+      if (!isPhone(phone)) { showAlert('error', 'Please enter a valid 10-digit phone number'); return; }
+      if (!email) { showAlert('error', 'Please enter your email address'); return; }
+      if (!isEmail(email)) { showAlert('error', 'Please enter a valid email address'); return; }
+      if (!selectedAmt || selectedAmt < 1) { showAlert('error', 'Please enter a donation amount'); return; }
+      if (!screenshotB64) { showAlert('error', 'Please upload your payment screenshot — this is required for verification'); return; }
+
+      const btn = document.getElementById('submitBtn');
+      const txt = document.getElementById('submitBtnText');
+      btn.disabled = true;
+      txt.textContent = 'Submitting...';
+
+      try {
+        const res = await fetch(API + '/payments/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name, phone, email, amount: selectedAmt,
+            message: msg, upiRef,
+            screenshotData: screenshotB64,
+            screenshotName: screenshotName || 'screenshot.jpg',
+          }),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.msg);
+
+        // Show success
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('successView').style.display = 'block';
+        document.getElementById('successPaymentId').textContent = data.paymentId || '—';
+
+        // Reload stats
+        loadStats(); loadRecent();
+
+      } catch (err) {
+        showAlert('error', err.message || 'Submission failed. Please try again.');
+        btn.disabled = false;
+        txt.textContent = 'Submit payment for verification';
+      }
+    }
+
+    /* Init */
+    loadStats();
+    loadRecent();
+  </script>
+</body>
+
+</html>

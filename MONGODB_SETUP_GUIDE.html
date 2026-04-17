@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Step 5 — MongoDB Atlas Setup Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --red: #E8221A; --red-light: #FFF0EF; --dark: #0E0E0E;
+      --mid: #555; --muted: #888; --border: #E5E5E5; --bg: #FAFAFA;
+      --green: #16A34A; --green-light: #F0FDF4;
+      --blue: #1D4ED8; --blue-light: #EFF6FF;
+      --font: 'Sora', sans-serif; --mono: 'Space Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); color: var(--dark); background: #F4F3F0; line-height: 1.65; }
+    a { color: var(--blue); }
+
+    .page { max-width: 820px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* Header */
+    .guide-header { text-align: center; margin-bottom: 48px; }
+    .guide-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--red-light); color: var(--red);
+      font-size: 0.78rem; font-weight: 700; padding: 5px 14px;
+      border-radius: 999px; margin-bottom: 16px; border: 1px solid #FFDFDD;
+    }
+    .guide-header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px; }
+    .guide-header p  { font-size: 1rem; color: var(--mid); }
+
+    /* Progress bar */
+    .progress-row {
+      display: flex; gap: 6px; margin-bottom: 40px;
+      background: white; border: 1px solid var(--border); border-radius: 14px; padding: 14px 20px;
+    }
+    .prog-step {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;
+      font-size: 0.68rem; color: var(--muted); text-align: center;
+    }
+    .prog-dot {
+      width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 0.72rem; font-weight: 700; color: var(--muted);
+      background: white;
+    }
+    .prog-step.done .prog-dot   { background: var(--green); border-color: var(--green); color: white; }
+    .prog-step.active .prog-dot { background: var(--red); border-color: var(--red); color: white; }
+    .prog-step.done .prog-label, .prog-step.active .prog-label { color: var(--dark); font-weight: 600; }
+    .prog-line { flex: 1; height: 2px; background: var(--border); margin-top: 13px; border-radius: 1px; }
+    .prog-line.done { background: var(--green); }
+
+    /* Step cards */
+    .step-card {
+      background: white; border: 1px solid var(--border); border-radius: 16px;
+      margin-bottom: 20px; overflow: hidden;
+    }
+    .step-header {
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px 24px; border-bottom: 1px solid var(--border);
+      cursor: pointer; user-select: none;
+    }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--red);
+      color: white; font-family: var(--mono); font-size: 0.85rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .step-num.done { background: var(--green); }
+    .step-title-block { flex: 1; }
+    .step-title { font-size: 1rem; font-weight: 600; margin-bottom: 2px; }
+    .step-sub   { font-size: 0.8rem; color: var(--muted); }
+    .step-toggle { font-size: 1.1rem; color: var(--muted); transition: transform .2s; }
+    .step-toggle.open { transform: rotate(180deg); }
+
+    .step-body { padding: 24px; display: none; }
+    .step-body.open { display: block; }
+
+    /* Action items */
+    .action-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .action-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      font-size: 0.9rem; color: var(--dark); line-height: 1.6;
+    }
+    .action-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--bg); border: 1px solid var(--border);
+      font-size: 0.68rem; font-weight: 700; color: var(--muted);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+    }
+
+    /* Mock screenshots */
+    .mock-screen {
+      background: #1E1E2E; border-radius: 10px; padding: 14px 18px; margin: 14px 0;
+      font-family: var(--mono); font-size: 0.78rem; color: #CDD6F4; line-height: 1.9;
+      border: 1px solid #313244; position: relative;
+    }
+    .mock-screen .label {
+      position: absolute; top: 10px; right: 14px;
+      font-size: 0.65rem; color: #585B70; font-family: var(--font);
+    }
+    .mock-ui {
+      background: white; border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px 20px; margin: 14px 0;
+    }
+    .mock-ui-title { font-size: 0.75rem; font-weight: 600; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .06em; }
+
+    .hl-green  { color: #A6E3A1; }
+    .hl-yellow { color: #F9E2AF; }
+    .hl-blue   { color: #89B4FA; }
+    .hl-red    { color: #F38BA8; }
+    .hl-gray   { color: #585B70; }
+
+    /* Input mockup */
+    .mock-input {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 9px 14px; font-size: 0.88rem; width: 100%; margin: 6px 0;
+      font-family: var(--mono); color: var(--dark);
+    }
+    .mock-label { font-size: 0.75rem; font-weight: 600; color: var(--mid); margin-top: 8px; display: block; }
+    .mock-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border-radius: 8px; font-size: 0.85rem;
+      font-weight: 700; font-family: var(--font); margin-top: 10px; cursor: default;
+    }
+    .mock-btn.green { background: var(--green); color: white; }
+    .mock-btn.blue  { background: var(--blue);  color: white; }
+    .mock-btn.red   { background: var(--red);   color: white; }
+
+    /* Alert boxes */
+    .alert-box {
+      padding: 12px 16px; border-radius: 8px; font-size: 0.85rem;
+      margin: 12px 0; display: flex; align-items: flex-start; gap: 10px; line-height: 1.6;
+    }
+    .alert-box.info    { background: var(--blue-light);  color: var(--blue);  border: 1px solid #BFDBFE; }
+    .alert-box.success { background: var(--green-light); color: var(--green); border: 1px solid #BBF7D0; }
+    .alert-box.warning { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+    .alert-box.danger  { background: var(--red-light);   color: var(--red);   border: 1px solid #FFDFDD; }
+    .alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* ENV block */
+    .env-block {
+      background: #0F172A; border-radius: 10px; padding: 20px 24px; margin: 14px 0;
+      border: 1px solid #1E293B;
+    }
+    .env-line { display: flex; align-items: baseline; gap: 10px; padding: 3px 0; }
+    .env-key   { color: #7DD3FC; font-family: var(--mono); font-size: 0.8rem; white-space: nowrap; }
+    .env-eq    { color: #94A3B8; font-family: var(--mono); font-size: 0.8rem; }
+    .env-val   { color: #86EFAC; font-family: var(--mono); font-size: 0.8rem; word-break: break-all; }
+    .env-comment { color: #475569; font-family: var(--mono); font-size: 0.75rem; }
+
+    /* Commands */
+    .cmd-block {
+      display: flex; align-items: center; gap: 10px;
+      background: #0F172A; border-radius: 8px;
+      padding: 12px 16px; margin: 8px 0; font-family: var(--mono); font-size: 0.82rem;
+    }
+    .cmd-prompt { color: #475569; }
+    .cmd-text   { color: #86EFAC; flex: 1; }
+    .cmd-copy {
+      font-family: var(--font); font-size: 0.68rem; font-weight: 600;
+      color: #475569; background: #1E293B; border: 1px solid #334155;
+      padding: 3px 8px; border-radius: 4px; cursor: pointer;
+      transition: color .2s; white-space: nowrap;
+    }
+    .cmd-copy:hover { color: #94A3B8; }
+
+    /* Connection string display */
+    .conn-string {
+      background: #0F172A; border-radius: 10px; padding: 16px 20px; margin: 12px 0;
+      font-family: var(--mono); font-size: 0.78rem; line-height: 1.8;
+      border: 1px solid #1E293B; word-break: break-all;
+    }
+    .cs-prefix  { color: #7DD3FC; }
+    .cs-user    { color: #F9E2AF; }
+    .cs-pass    { color: #F38BA8; }
+    .cs-host    { color: #A6E3A1; }
+    .cs-db      { color: #CBA6F7; }
+
+    /* Checklist */
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+    .checklist li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.88rem; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+      background: white;
+    }
+    .check-box {
+      width: 20px; height: 20px; border-radius: 5px; border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      font-size: 0.7rem; color: white;
+    }
+    .check-box.done { background: var(--green); border-color: var(--green); }
+
+    /* What's next */
+    .whats-next {
+      background: var(--dark); color: white; border-radius: 16px;
+      padding: 28px; margin-top: 32px; text-align: center;
+    }
+    .whats-next h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; }
+    .whats-next p  { font-size: 0.9rem; color: #888; margin-bottom: 20px; }
+    .next-steps { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .next-pill {
+      padding: 8px 18px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; border: 1px solid;
+    }
+    .next-pill.done   { background: rgba(22,163,74,0.15); border-color: rgba(22,163,74,0.3); color: #4ADE80; }
+    .next-pill.active { background: var(--red); border-color: var(--red); color: white; }
+    .next-pill.upcoming { background: rgba(255,255,255,0.05); border-color: #333; color: #666; }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+    strong { font-weight: 600; }
+    @media (max-width: 600px) { .progress-row { flex-wrap: wrap; gap: 10px; } .prog-line { display: none; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="guide-header">
+    <div class="guide-badge">&#9632; BloodLink TN — Step 5 of 8</div>
+    <h1>MongoDB Atlas Setup</h1>
+    <p>Connect your backend to a live cloud database — free forever on the free tier</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-row">
+    <div class="prog-step done"><div class="prog-dot">✓</div><div class="prog-label">Landing page</div></div>
+    <div class="prog-line done"></div>
+    <div class="prog-step done"><div class="prog-dot">✓</div><div class="prog-label">Patient UI</div></div>
+    <div class="prog-line done"></div>
+    <div class="prog-step done"><div class="prog-dot">✓</div><div class="prog-label">Bank UI</div></div>
+    <div class="prog-line done"></div>
+    <div class="prog-step done"><div class="prog-dot">✓</div><div class="prog-label">Backend API</div></div>
+    <div class="prog-line done"></div>
+    <div class="prog-step active"><div class="prog-dot">5</div><div class="prog-label">MongoDB</div></div>
+    <div class="prog-line"></div>
+    <div class="prog-step"><div class="prog-dot">6</div><div class="prog-label">Socket.io</div></div>
+    <div class="prog-line"></div>
+    <div class="prog-step"><div class="prog-dot">7</div><div class="prog-label">SMS alerts</div></div>
+    <div class="prog-line"></div>
+    <div class="prog-step"><div class="prog-dot">8</div><div class="prog-label">Deploy</div></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-card">
+    <div class="step-header" onclick="toggle(1)">
+      <div class="step-num">1</div>
+      <div class="step-title-block">
+        <div class="step-title">Create a free MongoDB Atlas account</div>
+        <div class="step-sub">Go to cloud.mongodb.com → sign up free</div>
+      </div>
+      <div class="step-toggle" id="tog1">▼</div>
+    </div>
+    <div class="step-body" id="body1">
+      <ul class="action-list">
+        <li class="action-item"><div class="action-num">1</div><div>Open your browser and go to <a href="https://cloud.mongodb.com" target="_blank">cloud.mongodb.com</a></div></li>
+        <li class="action-item"><div class="action-num">2</div><div>Click <strong>"Try Free"</strong> → Sign up with your email or Google account</div></li>
+        <li class="action-item"><div class="action-num">3</div><div>Verify your email address (check inbox for the confirmation email)</div></li>
+        <li class="action-item"><div class="action-num">4</div><div>Answer the setup questions: Choose <strong>"Learn MongoDB"</strong> or skip — doesn't matter</div></li>
+      </ul>
+      <div class="alert-box success"><div class="alert-icon">✓</div><div>MongoDB Atlas has a <strong>forever-free tier</strong> — 512MB storage, shared cluster. More than enough for your college project.</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-card">
+    <div class="step-header" onclick="toggle(2)">
+      <div class="step-num">2</div>
+      <div class="step-title-block">
+        <div class="step-title">Create a free cluster</div>
+        <div class="step-sub">This is your database server in the cloud</div>
+      </div>
+      <div class="step-toggle" id="tog2">▼</div>
+    </div>
+    <div class="step-body" id="body2">
+      <ul class="action-list">
+        <li class="action-item"><div class="action-num">1</div><div>Click <strong>"Create"</strong> or <strong>"Build a Database"</strong> button</div></li>
+        <li class="action-item"><div class="action-num">2</div><div>Choose <strong>"M0 Free"</strong> tier (the free option)</div></li>
+        <li class="action-item"><div class="action-num">3</div><div>Cloud Provider: Choose <strong>AWS</strong></div></li>
+        <li class="action-item"><div class="action-num">4</div><div>Region: Choose <strong>"Mumbai (ap-south-1)"</strong> — closest to Tamil Nadu = faster</div></li>
+        <li class="action-item"><div class="action-num">5</div><div>Cluster name: Leave as <strong>"Cluster0"</strong> or rename to <strong>"bloodlink"</strong></div></li>
+        <li class="action-item"><div class="action-num">6</div><div>Click <strong>"Create Cluster"</strong> — wait 1–3 minutes for it to set up</div></li>
+      </ul>
+      <div class="mock-ui">
+        <div class="mock-ui-title">What the cluster selector looks like</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:140px;border:2px solid var(--green);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:1.2rem;font-weight:700;color:var(--green)">M0</div>
+            <div style="font-size:0.78rem;color:var(--green);font-weight:600">FREE</div>
+            <div style="font-size:0.72rem;color:var(--mid);margin-top:4px">512MB · Shared · ✓ Select this</div>
+          </div>
+          <div style="flex:1;min-width:140px;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;opacity:0.5">
+            <div style="font-size:1.2rem;font-weight:700">M2</div>
+            <div style="font-size:0.78rem;color:var(--mid);font-weight:600">$9/month</div>
+            <div style="font-size:0.72rem;color:var(--mid);margin-top:4px">Skip — not needed</div>
+          </div>
+          <div style="flex:1;min-width:140px;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;opacity:0.5">
+            <div style="font-size:1.2rem;font-weight:700">M5</div>
+            <div style="font-size:0.78rem;color:var(--mid);font-weight:600">$25/month</div>
+            <div style="font-size:0.72rem;color:var(--mid);margin-top:4px">Skip — not needed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-card">
+    <div class="step-header" onclick="toggle(3)">
+      <div class="step-num">3</div>
+      <div class="step-title-block">
+        <div class="step-title">Create a database user</div>
+        <div class="step-sub">Username + password to access the DB from your backend</div>
+      </div>
+      <div class="step-toggle" id="tog3">▼</div>
+    </div>
+    <div class="step-body" id="body3">
+      <ul class="action-list">
+        <li class="action-item"><div class="action-num">1</div><div>On the left sidebar click <strong>"Database Access"</strong></div></li>
+        <li class="action-item"><div class="action-num">2</div><div>Click <strong>"Add New Database User"</strong></div></li>
+        <li class="action-item"><div class="action-num">3</div><div>Authentication Method: choose <strong>Password</strong></div></li>
+        <li class="action-item"><div class="action-num">4</div><div>Fill in a username and password — <strong>remember these!</strong></div></li>
+        <li class="action-item"><div class="action-num">5</div><div>Under "Built-in Role": select <strong>"Atlas Admin"</strong> or "Read and write to any database"</div></li>
+        <li class="action-item"><div class="action-num">6</div><div>Click <strong>"Add User"</strong></div></li>
+      </ul>
+      <div class="mock-ui">
+        <div class="mock-ui-title">Example values (use your own!)</div>
+        <span class="mock-label">Username</span>
+        <div class="mock-input">bloodlinkadmin</div>
+        <span class="mock-label">Password</span>
+        <div class="mock-input">BloodLink@TN2024</div>
+      </div>
+      <div class="alert-box warning"><div class="alert-icon">⚠</div><div>Write down this username and password — you'll need them in Step 5 below to build the connection string. Do NOT use spaces or <code>@</code> in the password.</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-card">
+    <div class="step-header" onclick="toggle(4)">
+      <div class="step-num">4</div>
+      <div class="step-title-block">
+        <div class="step-title">Allow all IP addresses</div>
+        <div class="step-sub">So your laptop and deployment server can both connect</div>
+      </div>
+      <div class="step-toggle" id="tog4">▼</div>
+    </div>
+    <div class="step-body" id="body4">
+      <ul class="action-list">
+        <li class="action-item"><div class="action-num">1</div><div>On the left sidebar click <strong>"Network Access"</strong></div></li>
+        <li class="action-item"><div class="action-num">2</div><div>Click <strong>"Add IP Address"</strong></div></li>
+        <li class="action-item"><div class="action-num">3</div><div>Click <strong>"Allow Access From Anywhere"</strong> — this adds <code>0.0.0.0/0</code></div></li>
+        <li class="action-item"><div class="action-num">4</div><div>Click <strong>"Confirm"</strong></div></li>
+      </ul>
+      <div class="alert-box info"><div class="alert-icon">ℹ</div><div><code>0.0.0.0/0</code> means any IP can connect. This is fine for a college project. In production, you'd restrict this to your server's IP only.</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step-card">
+    <div class="step-header" onclick="toggle(5)">
+      <div class="step-num">5</div>
+      <div class="step-title-block">
+        <div class="step-title">Get the connection string</div>
+        <div class="step-sub">The URL your backend uses to talk to MongoDB</div>
+      </div>
+      <div class="step-toggle" id="tog5">▼</div>
+    </div>
+    <div class="step-body" id="body5">
+      <ul class="action-list">
+        <li class="action-item"><div class="action-num">1</div><div>Go to <strong>"Database"</strong> in the left sidebar</div></li>
+        <li class="action-item"><div class="action-num">2</div><div>Click <strong>"Connect"</strong> next to your cluster</div></li>
+        <li class="action-item"><div class="action-num">3</div><div>Choose <strong>"Drivers"</strong></div></li>
+        <li class="action-item"><div class="action-num">4</div><div>Driver: <strong>Node.js</strong>, Version: <strong>5.5 or later</strong></div></li>
+        <li class="action-item"><div class="action-num">5</div><div>Copy the connection string shown — it looks like this:</div></li>
+      </ul>
+      <div class="conn-string">
+        <span class="cs-prefix">mongodb+srv://</span><span class="cs-user">bloodlinkadmin</span><span style="color:#94A3B8">:</span><span class="cs-pass">&lt;password&gt;</span><span style="color:#94A3B8">@</span><span class="cs-host">cluster0.abcde.mongodb.net</span><span style="color:#94A3B8">/</span><span class="cs-db">bloodlink</span><span style="color:#94A3B8">?retryWrites=true&amp;w=majority</span>
+      </div>
+      <ul class="action-list" style="margin-top:12px">
+        <li class="action-item"><div class="action-num">6</div><div>Replace <code>&lt;password&gt;</code> with the actual password you created in Step 3</div></li>
+        <li class="action-item"><div class="action-num">7</div><div>Change <code>myFirstDatabase</code> (if shown) to <strong><code>bloodlink</code></strong></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step-card">
+    <div class="step-header" onclick="toggle(6)">
+      <div class="step-num">6</div>
+      <div class="step-title-block">
+        <div class="step-title">Paste it into your .env file</div>
+        <div class="step-sub">Open blood-alert-backend/.env and update MONGO_URI</div>
+      </div>
+      <div class="step-toggle" id="tog6">▼</div>
+    </div>
+    <div class="step-body" id="body6">
+      <p style="font-size:0.88rem;color:var(--mid);margin-bottom:12px">Open <code>blood-alert-backend/.env</code> in VS Code and update it like this:</p>
+      <div class="env-block">
+        <div class="env-line"><span class="env-comment"># MongoDB — paste your connection string here</span></div>
+        <div class="env-line">
+          <span class="env-key">MONGO_URI</span>
+          <span class="env-eq">=</span>
+          <span class="env-val">mongodb+srv://bloodlinkadmin:BloodLink@TN2024@cluster0.abcde.mongodb.net/bloodlink?retryWrites=true&w=majority</span>
+        </div>
+        <div style="height:8px"></div>
+        <div class="env-line"><span class="env-comment"># JWT Secret — change this to a long random string</span></div>
+        <div class="env-line">
+          <span class="env-key">JWT_SECRET</span>
+          <span class="env-eq">=</span>
+          <span class="env-val">bloodlink_tn_super_secret_jwt_key_2024_changeme</span>
+        </div>
+        <div style="height:8px"></div>
+        <div class="env-line">
+          <span class="env-key">PORT</span><span class="env-eq">=</span><span class="env-val">5000</span>
+        </div>
+        <div class="env-line">
+          <span class="env-key">FRONTEND_URL</span><span class="env-eq">=</span><span class="env-val">http://localhost:5500</span>
+        </div>
+      </div>
+      <div class="alert-box danger"><div class="alert-icon">🔒</div><div><strong>Never share your .env file.</strong> Never upload it to GitHub. The <code>.gitignore</code> file in your backend already prevents this.</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 7 -->
+  <div class="step-card">
+    <div class="step-header" onclick="toggle(7)">
+      <div class="step-num">7</div>
+      <div class="step-title-block">
+        <div class="step-title">Test the connection &amp; seed data</div>
+        <div class="step-sub">Verify it works, then fill the DB with sample data</div>
+      </div>
+      <div class="step-toggle" id="tog7">▼</div>
+    </div>
+    <div class="step-body" id="body7">
+      <p style="font-size:0.88rem;color:var(--mid);margin-bottom:14px">Open your terminal, navigate to the backend folder, and run these commands one by one:</p>
+
+      <p style="font-size:0.82rem;font-weight:600;margin-bottom:6px">1. Test MongoDB connection:</p>
+      <div class="cmd-block"><span class="cmd-prompt">$</span><span class="cmd-text">npm run test:db</span><button class="cmd-copy" onclick="copy('npm run test:db',this)">copy</button></div>
+
+      <div class="mock-screen">
+        <div class="label">Expected output</div>
+        <span class="hl-gray">🔍  Testing MongoDB connection...</span><br/>
+        <span class="hl-green">✅  Connected to MongoDB Atlas!</span><br/>
+        <span class="hl-blue">📦  Database: bloodlink</span><br/>
+        <span class="hl-blue">🏠  Host:     cluster0.abcde.mongodb.net</span><br/>
+        <span class="hl-green">🎉  Your .env MONGO_URI is correct. Ready for Step 5!</span>
+      </div>
+
+      <p style="font-size:0.82rem;font-weight:600;margin-bottom:6px;margin-top:16px">2. Start the server:</p>
+      <div class="cmd-block"><span class="cmd-prompt">$</span><span class="cmd-text">npm run dev</span><button class="cmd-copy" onclick="copy('npm run dev',this)">copy</button></div>
+
+      <div class="mock-screen">
+        <div class="label">Expected output</div>
+        <span class="hl-green">✅  MongoDB connected: cluster0.abcde.mongodb.net</span><br/>
+        <span class="hl-blue">🩸  BloodLink TN API Server</span><br/>
+        <span class="hl-green">🚀  Running at: http://localhost:5000/api</span>
+      </div>
+
+      <p style="font-size:0.82rem;font-weight:600;margin-bottom:6px;margin-top:16px">3. Seed sample data (run once):</p>
+      <div class="cmd-block"><span class="cmd-prompt">$</span><span class="cmd-text">npm run seed</span><button class="cmd-copy" onclick="copy('npm run seed',this)">copy</button></div>
+
+      <div class="mock-screen">
+        <div class="label">Expected output</div>
+        <span class="hl-green">✅  Admin created: admin@bloodlink.tn</span><br/>
+        <span class="hl-green">✅  Bank created: Salem Government Blood Bank (Salem)</span><br/>
+        <span class="hl-green">✅  Bank created: Apollo Blood Centre Salem (Salem)</span><br/>
+        <span class="hl-green">✅  Bank created: Red Cross Blood Bank, Coimbatore (Coimbatore)</span><br/>
+        <span class="hl-gray">...</span><br/>
+        <span class="hl-yellow">📋  TEST ACCOUNTS:</span><br/>
+        <span class="hl-blue">Admin:  admin@bloodlink.tn / Admin@1234</span><br/>
+        <span class="hl-blue">Patient: arun@test.com / Test@1234</span>
+      </div>
+
+      <p style="font-size:0.82rem;font-weight:600;margin-bottom:6px;margin-top:16px">4. Test the API in your browser:</p>
+      <div class="cmd-block"><span class="cmd-prompt">URL</span><span class="cmd-text">http://localhost:5000/api/blood/search?group=B%2B&district=Salem</span><button class="cmd-copy" onclick="copy('http://localhost:5000/api/blood/search?group=B%2B&district=Salem',this)">copy</button></div>
+      <div class="mock-screen">
+        <span class="hl-green">{ "success": true, "count": 2, "results": [</span><br/>
+        &nbsp;&nbsp;<span class="hl-blue">{ "name": "Salem Government Blood Bank",</span><br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="hl-yellow">"units": 15, "district": "Salem", ... }</span><br/>
+        <span class="hl-green">] }</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 8 -->
+  <div class="step-card">
+    <div class="step-header" onclick="toggle(8)">
+      <div class="step-num">8</div>
+      <div class="step-title-block">
+        <div class="step-title">Connect frontend to backend</div>
+        <div class="step-sub">Replace mock data with real API calls using api.js</div>
+      </div>
+      <div class="step-toggle" id="tog8">▼</div>
+    </div>
+    <div class="step-body" id="body8">
+      <p style="font-size:0.88rem;color:var(--mid);margin-bottom:14px">Add <code>api.js</code> to your HTML pages, then replace the simulated timeouts with real calls. Example for the login form:</p>
+
+      <p style="font-size:0.82rem;font-weight:600;margin-bottom:8px">In <code>pages/register.html</code> — add this before <code>&lt;/body&gt;</code>:</p>
+      <div class="mock-screen">
+        <span class="hl-blue">&lt;script src=</span><span class="hl-green">"../js/api.js"</span><span class="hl-blue">&gt;&lt;/script&gt;</span><br/>
+        <span class="hl-blue">&lt;script src=</span><span class="hl-green">"../js/auth.js"</span><span class="hl-blue">&gt;&lt;/script&gt;</span>
+      </div>
+
+      <p style="font-size:0.82rem;font-weight:600;margin-bottom:8px;margin-top:16px">In <code>js/auth.js</code> — replace the login setTimeout block:</p>
+      <div class="mock-screen">
+        <span class="hl-gray">// OLD — delete this block:</span><br/>
+        <span class="hl-red">setTimeout(() => {</span><br/>
+        <span class="hl-red">&nbsp;&nbsp;setLoading('loginBtn', false);</span><br/>
+        <span class="hl-red">&nbsp;&nbsp;showFormAlert('loginAlert', 'success', '...');</span><br/>
+        <span class="hl-red">}, 1400);</span><br/><br/>
+        <span class="hl-gray">// NEW — paste this instead:</span><br/>
+        <span class="hl-blue">try {</span><br/>
+        <span class="hl-green">&nbsp;&nbsp;const data = await api.auth.login(email, password);</span><br/>
+        <span class="hl-green">&nbsp;&nbsp;window.location.href = getDashboardUrl(data.user.role);</span><br/>
+        <span class="hl-blue">} catch (err) {</span><br/>
+        <span class="hl-red">&nbsp;&nbsp;showFormAlert('loginAlert', 'error', err.message);</span><br/>
+        <span class="hl-yellow">&nbsp;&nbsp;setLoading('loginBtn', false);</span><br/>
+        <span class="hl-blue">}</span>
+      </div>
+
+      <div class="alert-box success" style="margin-top:16px"><div class="alert-icon">✓</div><div>Every <code>// BACKEND:</code> comment in your dashboard JS files shows exactly where to make these replacements. Find them with Ctrl+F in VS Code.</div></div>
+    </div>
+  </div>
+
+  <!-- Final checklist -->
+  <div class="step-card" style="margin-top:24px">
+    <div class="step-header" style="cursor:default">
+      <div class="step-num" style="background:#1D4ED8">✓</div>
+      <div class="step-title-block">
+        <div class="step-title">Step 5 completion checklist</div>
+        <div class="step-sub">Tick these off before moving to Step 6</div>
+      </div>
+    </div>
+    <div class="step-body" style="display:block">
+      <ul class="checklist">
+        <li><div class="check-box done">✓</div> MongoDB Atlas account created</li>
+        <li><div class="check-box done">✓</div> Free M0 cluster created in Mumbai region</li>
+        <li><div class="check-box done">✓</div> Database user created (with username + password)</li>
+        <li><div class="check-box done">✓</div> Network access set to 0.0.0.0/0 (allow all)</li>
+        <li><div class="check-box done">✓</div> Connection string copied and pasted into .env</li>
+        <li><div class="check-box done">✓</div> <code>npm run test:db</code> shows ✅ Connected</li>
+        <li><div class="check-box done">✓</div> <code>npm run seed</code> creates sample blood banks + patients</li>
+        <li><div class="check-box done">✓</div> <code>npm run dev</code> starts server without errors</li>
+        <li><div class="check-box done">✓</div> Search API returns real data from MongoDB</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- What's next -->
+  <div class="whats-next">
+    <h2>Step 5 complete! 🎉</h2>
+    <p>Your BloodLink TN app now saves real data to a live cloud database. Next up — real-time stock updates.</p>
+    <div class="next-steps">
+      <span class="next-pill done">✓ Landing page</span>
+      <span class="next-pill done">✓ Patient UI</span>
+      <span class="next-pill done">✓ Bank UI</span>
+      <span class="next-pill done">✓ Backend API</span>
+      <span class="next-pill active">✓ MongoDB</span>
+      <span class="next-pill upcoming">Step 6: Socket.io</span>
+      <span class="next-pill upcoming">Step 7: SMS alerts</span>
+      <span class="next-pill upcoming">Step 8: Deploy</span>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+function toggle(n) {
+  const body = document.getElementById('body' + n);
+  const tog  = document.getElementById('tog'  + n);
+  const open = body.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.step-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.step-toggle').forEach(t => t.classList.remove('open'));
+  // Open clicked (if it was closed)
+  if (!open) { body.classList.add('open'); tog.classList.add('open'); }
+}
+function copy(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 1500);
+  });
+}
+// Open first step by default
+toggle(1);
+</script>
+</body>
+</html>
